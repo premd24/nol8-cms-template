@@ -82,6 +82,55 @@ window.lottie = lottie;
 
 import './vendor/particles.js';
 
+// ── Date / time pickers (flatpickr) ─────────────────────────────────────────
+// <x-ui.date-picker>, <x-ui.time-picker> and <x-ui.datetime-picker> render an
+// input with a JSON `data-datepicker` config. Call `initDatePickers(root)`
+// after injecting markup dynamically (e.g. AJAX-loaded modals).
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+
+window.flatpickr = flatpickr;
+
+window.initDatePickers = function (root = document) {
+    root.querySelectorAll('input[data-datepicker]').forEach((input) => {
+        if (input._flatpickr) return;
+
+        const clearButton = input.closest('[data-datepicker-wrapper]')?.querySelector('[data-datepicker-clear]');
+        const toggleClear = (selectedDates) => clearButton?.classList.toggle('hidden', selectedDates.length === 0);
+
+        const picker = flatpickr(input, {
+            ...JSON.parse(input.dataset.datepicker || '{}'),
+            onReady: (selectedDates) => toggleClear(selectedDates),
+            onChange: (selectedDates) => toggleClear(selectedDates),
+        });
+
+        // Keep the label's `for` pointing at the visible (alt) input
+        if (picker.altInput) {
+            picker.altInput.id = `${input.id}-display`;
+            document.querySelector(`label[for="${input.id}"]`)?.setAttribute('for', picker.altInput.id);
+        }
+
+        clearButton?.addEventListener('click', () => picker.clear());
+    });
+};
+
+const startDatePickers = () => {
+    window.initDatePickers();
+
+    // Pick up inputs added later, e.g. drawers/modals that Alpine teleports into <body>
+    new MutationObserver((mutations) => {
+        if (mutations.some((mutation) => mutation.addedNodes.length > 0)) {
+            window.initDatePickers();
+        }
+    }).observe(document.body, { childList: true, subtree: true });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startDatePickers);
+} else {
+    startDatePickers();
+}
+
 window.confirmDelete = function(form, title = 'Are you sure?', text = "You won't be able to revert this!") {
     window.dispatchEvent(new CustomEvent('open-confirm-modal', {
         detail: {

@@ -56,9 +56,9 @@
             <x-heroicon-o-chevron-down class="h-5 w-5 select-chevron transition-transform duration-200" />
         </div>
 
-        {{-- Dropdown options list --}}
+        {{-- Dropdown options list (moved to <body> while open so overflow-hidden parents can't clip it) --}}
         <div
-            class="autocomplete-dropdown hidden absolute z-50 w-full bg-white border border-gray-100 shadow-xl max-h-60 overflow-y-auto p-1.5 rounded-xl top-full mt-1">
+            class="autocomplete-dropdown hidden fixed z-[60] bg-white border border-gray-100 shadow-xl max-h-60 overflow-y-auto p-1.5 rounded-xl">
             {{-- Populated dynamically via JS --}}
         </div>
     </div>
@@ -150,30 +150,59 @@
                     }));
                 }
 
-                function openDropdown() {
-                    loadOptions();
-                    renderDropdown(searchInput.value === selectedText() ? '' : searchInput.value);
+                const dropdownHome = dropdown.parentElement;
+                let isOpen = false;
 
-                    // Dynamic viewport collision check
+                // Position the fixed dropdown against the input, flipping above it near the viewport bottom
+                function positionDropdown() {
                     const rect = searchInput.getBoundingClientRect();
                     const viewportHeight = window.innerHeight;
                     const spaceBelow = viewportHeight - rect.bottom;
                     const dropdownHeight = 250; // threshold height
+                    const gap = 4;
+
+                    dropdown.style.left = `${rect.left}px`;
+                    dropdown.style.width = `${rect.width}px`;
 
                     if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-                        dropdown.classList.remove('top-full', 'mt-1');
-                        dropdown.classList.add('bottom-full', 'mb-1');
+                        dropdown.style.top = '';
+                        dropdown.style.bottom = `${viewportHeight - rect.top + gap}px`;
                     } else {
-                        dropdown.classList.remove('bottom-full', 'mb-1');
-                        dropdown.classList.add('top-full', 'mt-1');
+                        dropdown.style.bottom = '';
+                        dropdown.style.top = `${rect.bottom + gap}px`;
+                    }
+                }
+
+                function onViewportChange(e) {
+                    // Ignore scrolling inside the dropdown list itself
+                    if (e && e.target === dropdown) return;
+                    positionDropdown();
+                }
+
+                function openDropdown() {
+                    loadOptions();
+                    renderDropdown(searchInput.value === selectedText() ? '' : searchInput.value);
+
+                    if (!isOpen) {
+                        isOpen = true;
+                        document.body.appendChild(dropdown);
+                        window.addEventListener('scroll', onViewportChange, true);
+                        window.addEventListener('resize', onViewportChange);
                     }
 
+                    positionDropdown();
                     dropdown.classList.remove('hidden');
                     if (chevron) chevron.classList.add('rotate-180');
                 }
 
                 function closeDropdown() {
                     setTimeout(() => {
+                        if (isOpen) {
+                            isOpen = false;
+                            window.removeEventListener('scroll', onViewportChange, true);
+                            window.removeEventListener('resize', onViewportChange);
+                            dropdownHome.appendChild(dropdown);
+                        }
                         dropdown.classList.add('hidden');
                         if (chevron) chevron.classList.remove('rotate-180');
                         // If the user typed search text but didn't select, revert input value to selected text

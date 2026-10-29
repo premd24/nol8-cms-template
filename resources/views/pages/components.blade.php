@@ -8,6 +8,9 @@
                 <x-button type="button" variant="primary" onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: { name: 'demo-modal' } }))" icon-start="heroicon-o-swatch">
                     Open Demo Modal
                 </x-button>
+                <x-button type="button" variant="outline" onclick="window.dispatchEvent(new CustomEvent('open-drawer', { detail: { name: 'demo-drawer' } }))" icon-start="heroicon-o-arrow-left-end-on-rectangle">
+                    Open Side Drawer
+                </x-button>
             </x-slot>
         </x-ui.page-header>
 
@@ -140,6 +143,42 @@
             </div>
         </div>
 
+        <!-- Date & Time Pickers -->
+        <div class="space-y-4">
+            <h2 class="text-xl font-bold text-gray-900 border-b border-gray-150 pb-2">Date & Time Pickers (<code class="text-xs text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded font-mono">&lt;x-ui.date-picker&gt;</code> <code class="text-xs text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded font-mono">&lt;x-ui.time-picker&gt;</code> <code class="text-xs text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded font-mono">&lt;x-ui.datetime-picker&gt;</code>)</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <x-ui.card class="space-y-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider pb-2 border-b border-gray-50">Date</h3>
+
+                    <x-ui.date-picker label="Date Picker" name="example_date" :value="now()->format('Y-m-d')" />
+
+                    <x-ui.date-picker label="Date Range" name="example_date_range" range placeholder="Select a date range..." />
+
+                    <x-ui.date-picker label="Future Dates Only" name="example_future_date" min="today" />
+                </x-ui.card>
+
+                <x-ui.card class="space-y-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider pb-2 border-b border-gray-50">Time</h3>
+
+                    <x-ui.time-picker label="Time Picker" name="example_time" value="09:30" />
+
+                    <x-ui.time-picker label="24-Hour Time" name="example_time_24" time24 />
+
+                    <x-ui.time-picker label="Business Hours (09:00 – 18:00)" name="example_business_time" min="09:00" max="18:00" />
+                </x-ui.card>
+
+                <x-ui.card class="space-y-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider pb-2 border-b border-gray-50">Date & Time</h3>
+
+                    <x-ui.datetime-picker label="Date & Time Picker" name="example_datetime" :value="now()->format('Y-m-d H:i')" />
+
+                    <x-ui.datetime-picker label="24-Hour Date & Time" name="example_datetime_24" time24 />
+
+                    <p class="text-xs text-gray-500">Submitted values use <code class="font-mono">Y-m-d</code>, <code class="font-mono">H:i</code> and <code class="font-mono">Y-m-d H:i</code>, ready for Laravel's <code class="font-mono">date</code> / <code class="font-mono">date_format</code> rules. Ranges submit as <code class="font-mono">start to end</code>.</p>
+                </x-ui.card>
+            </div>
+        </div>
+
         <!-- Interactive Components: Dropdown, Section Card, Empty State -->
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-gray-900 border-b border-gray-150 pb-2">Containers & Interactive Utilities</h2>
@@ -188,6 +227,76 @@
                 </x-ui.empty-state>
             </div>
         </div>
+
+        <!-- Side Drawer -->
+        <div class="space-y-4">
+            <h2 class="text-xl font-bold text-gray-900 border-b border-gray-150 pb-2">Side Drawer (<code class="text-xs text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded font-mono">&lt;x-ui.drawer&gt;</code>)</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <x-ui.card class="flex flex-col justify-between gap-6">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Live Demo</h3>
+                        <p class="text-xs text-gray-500">Off-canvas panel for forms, filters and record details. Closes on backdrop click, the close button or Escape.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <x-button type="button" variant="primary" size="sm" onclick="window.dispatchEvent(new CustomEvent('open-drawer', { detail: { name: 'demo-drawer' } }))">
+                            Open Right Drawer
+                        </x-button>
+                        <x-button type="button" variant="outline" size="sm" onclick="window.dispatchEvent(new CustomEvent('open-drawer', { detail: { name: 'demo-drawer-left' } }))">
+                            Open Left Drawer
+                        </x-button>
+                    </div>
+                </x-ui.card>
+
+                <x-ui.card class="lg:col-span-2 space-y-4">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider pb-2 border-b border-gray-50">Usage</h3>
+                    <pre class="text-xs font-mono bg-gray-50 border border-gray-100 rounded-xl p-4 overflow-x-auto text-gray-700">@verbatim<x-ui.drawer name="edit-item" title="Edit Item" subtitle="Optional subtitle" position="right" width="md">
+    ...content...
+    <x-slot name="footer">...actions...</x-slot>
+</x-ui.drawer>
+
+// Open / close from anywhere
+window.dispatchEvent(new CustomEvent('open-drawer', { detail: { name: 'edit-item' } }));
+window.dispatchEvent(new CustomEvent('close-drawer', { detail: { name: 'edit-item' } }));@endverbatim</pre>
+                    <p class="text-xs text-gray-500"><code class="font-mono">position</code>: <code class="font-mono">right</code> (default) or <code class="font-mono">left</code>. <code class="font-mono">width</code>: <code class="font-mono">sm</code>, <code class="font-mono">md</code> (default), <code class="font-mono">lg</code>, <code class="font-mono">xl</code>, <code class="font-mono">2xl</code>, <code class="font-mono">3xl</code>. Full width on mobile.</p>
+                </x-ui.card>
+            </div>
+        </div>
+
+        <!-- Demo Side Drawers -->
+        <x-ui.drawer name="demo-drawer" title="Edit Sample Item" subtitle="Changes are not saved in this demo">
+            <div class="space-y-6">
+                <x-ui.input label="Item Name" name="drawer_item_name" placeholder="e.g. Starter Pack A" />
+                <x-ui.select label="Status" name="drawer_item_status" :options="['active' => 'Active', 'inactive' => 'Inactive']" value="active" />
+                <x-ui.date-picker label="Publish Date" name="drawer_publish_date" />
+                <x-ui.textarea label="Description" name="drawer_item_description" placeholder="Type something..." rows="4" />
+            </div>
+
+            <x-slot name="footer">
+                <x-button type="button" variant="secondary-outline" onclick="window.dispatchEvent(new CustomEvent('close-drawer', { detail: { name: 'demo-drawer' } }))">
+                    Cancel
+                </x-button>
+                <x-button type="button" variant="primary" onclick="window.dispatchEvent(new CustomEvent('close-drawer', { detail: { name: 'demo-drawer' } }))">
+                    Save Changes
+                </x-button>
+            </x-slot>
+        </x-ui.drawer>
+
+        <x-ui.drawer name="demo-drawer-left" title="Filters" position="left" width="sm">
+            <div class="space-y-6">
+                <x-ui.date-picker label="Created Between" name="drawer_filter_range" range placeholder="Select a date range..." />
+                <div class="space-y-3">
+                    <label class="block text-sm font-bold text-gray-700">Visibility</label>
+                    <x-ui.checkbox label="Active items" name="drawer_filter_active" checked />
+                    <x-ui.checkbox label="Inactive items" name="drawer_filter_inactive" />
+                </div>
+            </div>
+
+            <x-slot name="footer">
+                <x-button type="button" variant="primary" class="w-full" onclick="window.dispatchEvent(new CustomEvent('close-drawer', { detail: { name: 'demo-drawer-left' } }))">
+                    Apply Filters
+                </x-button>
+            </x-slot>
+        </x-ui.drawer>
 
         <!-- Demo Modal Component -->
         <x-ui.modal name="demo-modal" title="Component Showcase Modal">

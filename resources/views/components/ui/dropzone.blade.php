@@ -86,21 +86,43 @@
                     fileList.addClass('p-4 bg-gray-50 rounded-2xl border border-gray-100');
                     for (let i = 0; i < files.length; i++) {
                         const size = (files[i].size / 1024 / 1024).toFixed(2);
-                        fileList.append(`
-                            <div class="text-sm text-gray-700 flex items-center justify-between p-2 hover:bg-white rounded-xl transition-colors">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-8 w-8 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm">
+                        const row = $(`
+                            <div class="text-sm text-gray-700 flex items-center justify-between gap-3 p-2 hover:bg-white rounded-xl transition-colors">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="h-8 w-8 shrink-0 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm">
                                         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     </div>
-                                    <span class="font-bold truncate max-w-[200px]">${files[i].name}</span>
+                                    <span class="file-name font-bold truncate max-w-[200px]"></span>
                                 </div>
-                                <span class="text-xs font-extrabold text-gray-400 uppercase tracking-tighter">${size} MB</span>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="text-xs font-extrabold text-gray-400 uppercase tracking-tighter">${size} MB</span>
+                                    <button type="button" data-index="${i}"
+                                        class="dropzone-remove h-7 w-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                                        title="Remove file" aria-label="Remove file">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
+                                </div>
                             </div>
                         `);
+                        row.find('.file-name').text(files[i].name).attr('title', files[i].name);
+                        fileList.append(row);
                     }
                 } else {
                     fileList.removeClass('p-4 bg-gray-50 rounded-2xl border border-gray-100');
                 }
+            });
+
+            // Remove a single file by rebuilding the input's FileList without it
+            fileList.on('click', '.dropzone-remove', function() {
+                const removeIndex = Number($(this).data('index'));
+                const dataTransfer = new DataTransfer();
+
+                Array.from(fileInput[0].files).forEach((file, i) => {
+                    if (i !== removeIndex) dataTransfer.items.add(file);
+                });
+
+                fileInput[0].files = dataTransfer.files;
+                fileInput.trigger('change');
             });
 
             // Drag and Drop Logic
